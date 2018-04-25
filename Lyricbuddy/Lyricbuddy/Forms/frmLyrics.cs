@@ -8,6 +8,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SpotifyAPI.Local;
+using SpotifyAPI.Local.Enums;
+using SpotifyAPI.Local.Models;
 
 namespace Lyricbuddy
 {
@@ -19,6 +22,8 @@ namespace Lyricbuddy
             InitializeComponent();
 
             spotifyController = new SpotifyController();
+            spotifyController._OnTrackChanged += OnTrackChanged;
+
             switch(spotifyController.Connect())
             {
                 case SpotifyController.ConnectionStatus.SuccessfulConnection:
@@ -40,6 +45,21 @@ namespace Lyricbuddy
 
         private void frmLyrics_Load(object sender, EventArgs e)
         {
+            label1.Text = spotifyController.GetTrack.TrackResource.Name;
+        }
+        private void button1_Click(object sender, EventArgs e)
+        {
+        }
+        
+        private void OnTrackChanged(object sender, EventArgs e)
+        {
+            if (label1.InvokeRequired)
+            {
+                Invoke(new MethodInvoker(delegate
+                {
+                    label1.Text = spotifyController.GetTrack.TrackResource.Name;
+                }));
+            }
             
         }
     }
