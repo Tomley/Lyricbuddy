@@ -11,6 +11,8 @@ using System.Windows.Forms;
 using SpotifyAPI.Local;
 using SpotifyAPI.Local.Enums;
 using SpotifyAPI.Local.Models;
+using Microsoft.Owin.Security.OAuth;
+using Newtonsoft.Json;
 
 namespace Lyricbuddy
 {
@@ -40,18 +42,13 @@ namespace Lyricbuddy
                 default:
                     break;
             }
+           
         }
 
         private void frmLyrics_Load(object sender, EventArgs e)
         {
-            label1.Text = spotifyController.GetTrack.TrackResource.Name;
+            label1.Text = spotifyController.GetTrack.TrackResource.Name + " - " + spotifyController.GetTrack.ArtistResource.Name;
         }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void OnTrackChanged(object sender, EventArgs e)
         {
             Invoke(new MethodInvoker(delegate
@@ -59,10 +56,20 @@ namespace Lyricbuddy
                 UpdateLyrics();
             }));
         }
-
+        
         private void UpdateLyrics()
         {
-            label1.Text = spotifyController.GetTrack.TrackResource.Name;
+            label1.Text = spotifyController.GetTrack.TrackResource.Name + " - " + spotifyController.GetTrack.ArtistResource.Name;
+        }
+
+        private async void button1_ClickAsync(object sender, EventArgs e)
+        {
+            GeniusScraper G = new GeniusScraper();
+
+            string test = await G.SearchGeniusASync(textBox1.Text);
+
+            var test1 = JsonConvert.DeserializeObject<GeniusApiObject.RootObject>(test);
+            MessageBox.Show(test1.response.hits[0].result.title);
         }
     }
 }

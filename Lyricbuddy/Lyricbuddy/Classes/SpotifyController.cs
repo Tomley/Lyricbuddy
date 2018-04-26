@@ -41,7 +41,6 @@ namespace Lyricbuddy.Classes
             _spotify.OnTrackTimeChange += OnTrackTimeChange;
             _spotify.OnTrackChange += OnTrackChange;
             _spotify.OnPlayStateChange += OnPlayStateChange;
-
         }
         
         public ConnectionStatus Connect()
@@ -105,7 +104,6 @@ namespace Lyricbuddy.Classes
             {
                 _currentTrack = status.Track;
             }
-           
         }
 
         #region EventHandlers
