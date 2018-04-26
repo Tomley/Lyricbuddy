@@ -20,13 +20,14 @@ namespace Lyricbuddy.Classes
 
         public bool IsPlaying { get { return _spotify.GetStatus().Playing; } }
         public Track GetTrack { get { return _currentTrack; } }
+        public double GetTrackTime { get { return _spotify.GetStatus().PlayingPosition;  } }
+        public double GetVolume { get { return _spotify.GetStatus().Volume; } }
 
         public event EventHandler _OnTrackChanged;
         public event EventHandler _OnVolumeChange;
         public event EventHandler _OnTrackTimeChange;
         public event EventHandler _OnPlayStateChange;
-
-
+        
         public SpotifyController()
         {
             
@@ -48,6 +49,7 @@ namespace Lyricbuddy.Classes
             RetryConnection:
             if (!SpotifyLocalAPI.IsSpotifyRunning())
             {
+                // DRY
                 DialogResult reconnect = MessageBox.Show("Couldn't connect to the Spotify client. Would you like to retry?", "Retry Connection", MessageBoxButtons.YesNo);
                 if (reconnect == DialogResult.Yes)
                 {
@@ -58,28 +60,44 @@ namespace Lyricbuddy.Classes
                     return ConnectionStatus.SpotifyNotRunning;
                 }
             }
-
-            if (_spotify.Connect())
+            try
             {
-                FetchInformation();
-                _spotify.ListenForEvents = true;
-                return ConnectionStatus.SuccessfulConnection;
-            }
-            else
-            {
-                DialogResult reconnect = MessageBox.Show("Couldn't connect to the Spotify client. Would you like to retry?", "Retry Connection", MessageBoxButtons.YesNo);
-                if (reconnect == DialogResult.Yes)
+                if (_spotify.Connect())
                 {
-                    goto RetryConnection;
+                    FetchInformation();
+                    _spotify.ListenForEvents = true;
+                    return ConnectionStatus.SuccessfulConnection;
                 }
                 else
                 {
-                    return ConnectionStatus.CancelledConnection;
+                    // DRY
+                    DialogResult reconnect = MessageBox.Show("Couldn't connect to the Spotify client. Would you like to retry?", "Retry Connection", MessageBoxButtons.YesNo);
+                    if (reconnect == DialogResult.Yes)
+                    {
+                        goto RetryConnection;
+                    }
+                    else
+                    {
+                        return ConnectionStatus.CancelledConnection;
+                    }
+                }
+            }
+            catch
+            {
+                // DRY
+                DialogResult reconnect = MessageBox.Show("Couldn't connect to the Spotify client. Would you like to retry?", "Retry Connection", MessageBoxButtons.YesNo);
+                if (reconnect == DialogResult.Yes)
+                {
+                    goto RetryConnection; 
+                }
+                else
+                {
+                    return ConnectionStatus.SpotifyNotRunning;
                 }
             }
         }
         
-        public void FetchInformation()
+        private void FetchInformation()
         {
             StatusResponse status = _spotify.GetStatus();
             if (status == null) { return; }
@@ -87,8 +105,7 @@ namespace Lyricbuddy.Classes
             {
                 _currentTrack = status.Track;
             }
-
-
+           
         }
 
         #region EventHandlers
@@ -99,6 +116,7 @@ namespace Lyricbuddy.Classes
                 Invoke(new Action(() => OnVolumeChange(sender, e)));
                 return;
             }
+            
             _OnVolumeChange?.Invoke(sender, null);
         }
 

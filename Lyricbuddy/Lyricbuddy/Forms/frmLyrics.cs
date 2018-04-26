@@ -24,10 +24,9 @@ namespace Lyricbuddy
             spotifyController = new SpotifyController();
             spotifyController._OnTrackChanged += OnTrackChanged;
 
-            switch(spotifyController.Connect())
+            switch (spotifyController.Connect())
             {
                 case SpotifyController.ConnectionStatus.SuccessfulConnection:
-                    MessageBox.Show("Successful Connection");
                     break;
                 case SpotifyController.ConnectionStatus.SpotifyNotRunning:
                     MessageBox.Show("Spotify not running.");
@@ -47,20 +46,23 @@ namespace Lyricbuddy
         {
             label1.Text = spotifyController.GetTrack.TrackResource.Name;
         }
+
         private void button1_Click(object sender, EventArgs e)
         {
+
         }
-        
+
         private void OnTrackChanged(object sender, EventArgs e)
         {
-            if (label1.InvokeRequired)
+            Invoke(new MethodInvoker(delegate
             {
-                Invoke(new MethodInvoker(delegate
-                {
-                    label1.Text = spotifyController.GetTrack.TrackResource.Name;
-                }));
-            }
-            
+                UpdateLyrics();
+            }));
+        }
+
+        private void UpdateLyrics()
+        {
+            label1.Text = spotifyController.GetTrack.TrackResource.Name;
         }
     }
 }
